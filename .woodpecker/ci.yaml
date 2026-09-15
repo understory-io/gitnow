@@ -6,7 +6,7 @@ when:
 
 steps:
   test:
-    image: rust:1.93-bookworm
+    image: rust:1.98-bookworm
     environment:
       CARGO_TERM_COLOR: always
     commands:
