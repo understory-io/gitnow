@@ -54,6 +54,7 @@ impl GitClone {
         let path_str = project_path.display().to_string();
         let context = HashMap::from([
             ("ssh_url", repository.ssh_url.as_str()),
+            ("clone_url", repository.clone_url.as_str()),
             ("path", path_str.as_str()),
         ]);
 

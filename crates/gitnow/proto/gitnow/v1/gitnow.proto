@@ -11,4 +11,5 @@ message Repository {
   string owner = 2;
   string repo_name= 3;
   string ssh_url = 4;
+  string clone_url = 5;
 }

@@ -6,6 +6,7 @@ pub struct Repository {
     pub owner: String,
     pub repo_name: String,
     pub ssh_url: String,
+    pub clone_url: String,
 }
 
 impl Repository {

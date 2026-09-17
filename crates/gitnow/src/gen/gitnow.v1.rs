@@ -17,5 +17,7 @@ pub struct Repository {
     pub repo_name: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
     pub ssh_url: ::prost::alloc::string::String,
+    #[prost(string, tag="5")]
+    pub clone_url: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)

@@ -8,6 +8,7 @@ use crate::{app::App, config::GiteaAccessToken};
 struct GiteaRepo {
     name: Option<String>,
     ssh_url: Option<String>,
+    clone_url: Option<String>,
     owner: Option<GiteaUser>,
 }
 
@@ -173,6 +174,9 @@ fn to_repositories(provider: &str, repos: Vec<GiteaRepo>) -> Vec<super::Reposito
             ssh_url: repo
                 .ssh_url
                 .expect("ssh url to be set for a gitea repository"),
+            clone_url: repo
+                .clone_url
+                .expect("clone url to be set for a gitea repository"),
         })
         .collect()
 }

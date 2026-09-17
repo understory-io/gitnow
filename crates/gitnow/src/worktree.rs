@@ -52,6 +52,7 @@ impl Worktree {
         let bare_path_str = bare_path.display().to_string();
         let context = HashMap::from([
             ("ssh_url", repository.ssh_url.as_str()),
+            ("clone_url", repository.clone_url.as_str()),
             ("bare_path", bare_path_str.as_str()),
         ]);
 

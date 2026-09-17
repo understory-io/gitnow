@@ -118,7 +118,13 @@ By default gitnow uses `git clone`. You can override this with any command using
 clone_command = "jj git clone {{ ssh_url }} {{ path }}"
 ```
 
-Available template variables: `ssh_url`, `path`.
+Available template variables: `ssh_url`, `clone_url`, `path`. Use `clone_url`
+for the provider's HTTPS clone URL:
+
+```toml
+[settings]
+clone_command = "git clone {{ clone_url }} {{ path }}"
+```
 
 ### Worktrees
 
@@ -174,7 +180,7 @@ add_command = "jj -R {{ bare_path }} workspace add --name {{ branch }} {{ worktr
 list_branches_command = "jj -R {{ bare_path }} bookmark list -T 'name ++ \"\\n\"'"
 ```
 
-Available template variables for worktree commands: `bare_path`, `worktree_path`, `branch`, `ssh_url`.
+Available template variables for worktree commands: `bare_path`, `worktree_path`, `branch`, `ssh_url`, `clone_url`.
 
 ### Listing repositories
 

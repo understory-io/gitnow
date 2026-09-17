@@ -79,6 +79,7 @@ impl From<&str> for Repository {
             owner: owner.to_string(),
             repo_name: name.to_string(),
             ssh_url: format!("ssh://git@{provider}/{owner}/{name}.git"),
+            clone_url: format!("https://{provider}/{owner}/{name}.git"),
         }
     }
 }
