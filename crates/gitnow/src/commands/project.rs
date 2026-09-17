@@ -73,6 +73,11 @@ pub struct ProjectCreateCommand {
     /// Skip spawning a shell in the project directory
     #[arg(long = "no-shell", default_value = "false")]
     no_shell: bool,
+
+    /// Create the project with no repositories, skipping selection. Repositories
+    /// can be added later with 'gitnow project add'
+    #[arg(long = "allow-empty", default_value = "false")]
+    allow_empty: bool,
 }
 
 #[derive(clap::Parser)]
@@ -532,13 +537,15 @@ impl ProjectCreateCommand {
                 }
             }
             matched
+        } else if self.allow_empty {
+            Vec::new()
         } else {
             eprintln!("Select repositories (Tab to toggle, Enter to confirm):");
             app.interactive()
                 .interactive_multi_search(&repositories)?
         };
 
-        if selected_repos.is_empty() {
+        if selected_repos.is_empty() && !self.allow_empty {
             anyhow::bail!("no repositories selected");
         }
 

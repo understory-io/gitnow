@@ -209,6 +209,10 @@ gitnow project create my-feature -t default
 # Create non-interactively with specific repos (fuzzy-matched)
 gitnow project create my-feature --repos repo-a --repos repo-b --no-template --no-shell
 
+# Create an empty project, for when the repos aren't known yet
+gitnow project create my-feature --allow-empty --no-template --no-shell
+gitnow project add my-feature --repos repo-a
+
 # Open an existing project (interactive selection)
 gitnow project
 

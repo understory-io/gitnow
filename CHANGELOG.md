@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `gitnow project create --allow-empty` creates a project with no repositories, skipping repo selection. Without it, an automated caller that doesn't yet know which repos it needs has no way through: omitting `--repos` opens the fzf picker, which needs a TTY. Repos can be added later with `gitnow project add`
+
 ## [0.7.0] - 2026-09-10
 
 ### Added
