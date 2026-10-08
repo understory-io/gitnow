@@ -36,7 +36,7 @@ crossterm = { version = "0.28.0", features = ["event-stream"] }
 futures = "0.3.30"
 termwiz = "0.23.0"
 regex = "1.11.1"
-minijinja = "2"
+minijinja = "3"
 shell-words = "1"
 chrono = { version = "0.4", default-features = false, features = ["std", "now", "serde"] }
 serde_json = "1"
