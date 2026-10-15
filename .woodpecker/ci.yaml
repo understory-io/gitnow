@@ -10,4 +10,24 @@ steps:
     environment:
       CARGO_TERM_COLOR: always
     commands:
+      - 'command -v ci-cache >/dev/null || { (curl -fsS --connect-timeout 5 --max-time 60 -o /usr/local/bin/.ci-cache.part https://git.kjuulh.io/api/packages/kjuulh/generic/ci-cache/0.2.0/ci-cache-0.2.0-x86_64-linux-musl 2>/dev/null || { if command -v timeout >/dev/null; then timeout 60 wget -q -T 5 -O /usr/local/bin/.ci-cache.part https://git.kjuulh.io/api/packages/kjuulh/generic/ci-cache/0.2.0/ci-cache-0.2.0-x86_64-linux-musl; else wget -q -T 5 -O /usr/local/bin/.ci-cache.part https://git.kjuulh.io/api/packages/kjuulh/generic/ci-cache/0.2.0/ci-cache-0.2.0-x86_64-linux-musl; fi; } 2>/dev/null) && echo "9a8b7b692aaf73f6499de5bca19f15f7609783db03b65bdca252127fea17d36a  /usr/local/bin/.ci-cache.part" | sha256sum -c - >/dev/null 2>&1 && chmod 0755 /usr/local/bin/.ci-cache.part && mv /usr/local/bin/.ci-cache.part /usr/local/bin/ci-cache; rm -f /usr/local/bin/.ci-cache.part; command -v ci-cache >/dev/null || echo "ci-cache client unavailable, building uncached"; }'  # ci-cache: managed by kjuulh/woodpecker-forest
+      - 'if command -v ci-cache >/dev/null; then ci-cache restore test --preset cargo; fi'  # ci-cache: managed by kjuulh/woodpecker-forest
+      - 'if command -v ci-cache >/dev/null; then eval "$$(ci-cache env)"; fi'  # ci-cache: managed by kjuulh/woodpecker-forest
       - cargo test --workspace --locked
+      - 'if command -v ci-cache >/dev/null; then ci-cache stats; fi'  # ci-cache: managed by kjuulh/woodpecker-forest
+
+  cache-save:  # ci-cache: managed by kjuulh/woodpecker-forest
+    # Saves every wired step's snapshot from the shared workspace (grund-docs design/ci-cache.md).  # ci-cache: managed by kjuulh/woodpecker-forest
+    image: alpine:3.22  # ci-cache: managed by kjuulh/woodpecker-forest
+    depends_on: [test]  # ci-cache: managed by kjuulh/woodpecker-forest
+    failure: ignore  # ci-cache: managed by kjuulh/woodpecker-forest
+    when:  # ci-cache: managed by kjuulh/woodpecker-forest
+      - event: push  # ci-cache: managed by kjuulh/woodpecker-forest
+        branch: main  # ci-cache: managed by kjuulh/woodpecker-forest
+      - event: manual  # ci-cache: managed by kjuulh/woodpecker-forest
+    environment:  # ci-cache: managed by kjuulh/woodpecker-forest
+      CICACHE_PASSWORD:  # ci-cache: managed by kjuulh/woodpecker-forest
+        from_secret: ci_cache_public  # ci-cache: managed by kjuulh/woodpecker-forest
+    commands:  # ci-cache: managed by kjuulh/woodpecker-forest
+      - 'command -v ci-cache >/dev/null || { (curl -fsS --connect-timeout 5 --max-time 60 -o /usr/local/bin/.ci-cache.part https://git.kjuulh.io/api/packages/kjuulh/generic/ci-cache/0.2.0/ci-cache-0.2.0-x86_64-linux-musl 2>/dev/null || { if command -v timeout >/dev/null; then timeout 60 wget -q -T 5 -O /usr/local/bin/.ci-cache.part https://git.kjuulh.io/api/packages/kjuulh/generic/ci-cache/0.2.0/ci-cache-0.2.0-x86_64-linux-musl; else wget -q -T 5 -O /usr/local/bin/.ci-cache.part https://git.kjuulh.io/api/packages/kjuulh/generic/ci-cache/0.2.0/ci-cache-0.2.0-x86_64-linux-musl; fi; } 2>/dev/null) && echo "9a8b7b692aaf73f6499de5bca19f15f7609783db03b65bdca252127fea17d36a  /usr/local/bin/.ci-cache.part" | sha256sum -c - >/dev/null 2>&1 && chmod 0755 /usr/local/bin/.ci-cache.part && mv /usr/local/bin/.ci-cache.part /usr/local/bin/ci-cache; rm -f /usr/local/bin/.ci-cache.part; command -v ci-cache >/dev/null || echo "ci-cache client unavailable, building uncached"; }'  # ci-cache: managed by kjuulh/woodpecker-forest
+      - 'if command -v ci-cache >/dev/null; then ci-cache save-all; fi'  # ci-cache: managed by kjuulh/woodpecker-forest
