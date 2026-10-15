@@ -25,6 +25,7 @@ impl CacheCodec {
                 owner: repo.owner,
                 repo_name: repo.repo_name,
                 ssh_url: repo.ssh_url,
+                clone_url: repo.clone_url,
             });
         }
 
@@ -38,11 +39,21 @@ impl CacheCodec {
         let mut repos = Vec::new();
 
         for codec_repo in codex_repos.repositories {
+            let clone_url = if codec_repo.clone_url.is_empty() {
+                format!(
+                    "https://{}/{}/{}.git",
+                    codec_repo.provider, codec_repo.owner, codec_repo.repo_name
+                )
+            } else {
+                codec_repo.clone_url
+            };
+
             repos.push(Repository {
                 provider: codec_repo.provider,
                 owner: codec_repo.owner,
                 repo_name: codec_repo.repo_name,
                 ssh_url: codec_repo.ssh_url,
+                clone_url,
             });
         }
 
@@ -57,5 +68,50 @@ pub trait CacheCodecApp {
 impl CacheCodecApp for &'static App {
     fn cache_codec(&self) -> CacheCodec {
         CacheCodec::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn repository() -> Repository {
+        Repository {
+            provider: "github.com".into(),
+            owner: "owner".into(),
+            repo_name: "repo".into(),
+            ssh_url: "git@github.com:owner/repo.git".into(),
+            clone_url: "https://github.com/owner/repo.git".into(),
+        }
+    }
+
+    #[test]
+    fn round_trip_preserves_clone_url() {
+        let codec = CacheCodec::new();
+        let expected = vec![repository()];
+
+        let encoded = codec.serialize_repositories(&expected).unwrap();
+        let decoded = codec.deserialize_repositories(encoded).unwrap();
+
+        assert_eq!(decoded, expected);
+    }
+
+    #[test]
+    fn legacy_cache_derives_clone_url_when_field_is_missing() {
+        let codec = CacheCodec::new();
+        let encoded = proto_codec::Repositories {
+            repositories: vec![proto_codec::Repository {
+                provider: "github.com".into(),
+                owner: "owner".into(),
+                repo_name: "repo".into(),
+                ssh_url: "git@github.com:owner/repo.git".into(),
+                clone_url: String::new(),
+            }],
+        }
+        .encode_to_vec();
+
+        let decoded = codec.deserialize_repositories(encoded).unwrap();
+
+        assert_eq!(decoded[0].clone_url, "https://github.com/owner/repo.git");
     }
 }

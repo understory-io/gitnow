@@ -91,6 +91,29 @@ mod tests {
     }
 
     #[test]
+    fn custom_clone_command_can_use_https_clone_url() {
+        let template = "git clone {{ clone_url }} {{ path }}";
+        let context = HashMap::from([
+            ("clone_url", "https://github.com/owner/repo.git"),
+            ("path", "/home/user/git/github.com/owner/repo"),
+        ]);
+
+        let (program, args) = render_command_parts(template, &context).unwrap();
+
+        assert_eq!(
+            (program, args),
+            (
+                "git".to_string(),
+                vec![
+                    "clone".to_string(),
+                    "https://github.com/owner/repo.git".to_string(),
+                    "/home/user/git/github.com/owner/repo".to_string(),
+                ]
+            )
+        );
+    }
+
+    #[test]
     fn test_render_worktree_clone_command() {
         let context = HashMap::from([
             ("ssh_url", "ssh://git@github.com/owner/repo.git"),

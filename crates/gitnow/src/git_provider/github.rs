@@ -8,6 +8,7 @@ struct GitHubRepo {
     name: String,
     owner: Option<GitHubOwner>,
     ssh_url: Option<String>,
+    clone_url: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -127,6 +128,7 @@ impl GitHubProvider {
                     owner: repo.owner.map(|o| o.login)?,
                     repo_name: repo.name,
                     ssh_url: repo.ssh_url?,
+                    clone_url: repo.clone_url?,
                 })
             })
             .collect()

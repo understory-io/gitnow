@@ -279,9 +279,9 @@ to stderr and continues — it never prompts, so `--no-shell` automation is safe
 projects = { directory = "~/git" }
 
 # Custom clone command (minijinja template)
-# Available variables: {{ ssh_url }}, {{ path }}
+# Available variables: {{ ssh_url }}, {{ clone_url }}, {{ path }}
 # Default: "git clone {{ ssh_url }} {{ path }}"
-clone_command = "git clone {{ ssh_url }} {{ path }}"
+clone_command = "git clone {{ clone_url }} {{ path }}"
 
 # Commands to run after cloning a repository
 post_clone_command = "echo 'cloned!'"
@@ -300,7 +300,7 @@ duration = { days = 7, hours = 0, minutes = 0 }
 
 [settings.worktree]
 # Custom worktree commands (minijinja templates)
-clone_command = "git clone --bare {{ ssh_url }} {{ bare_path }}"
+clone_command = "git clone --bare {{ clone_url }} {{ bare_path }}"
 add_command = "git -C {{ bare_path }} worktree add {{ worktree_path }} {{ branch }}"
 list_branches_command = "git -C {{ bare_path }} branch -r --format=%(refname:short)"
 

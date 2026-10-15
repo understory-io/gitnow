@@ -324,6 +324,7 @@ async fn clone_repos_into(
             let path_str = clone_path.display().to_string();
             let context = HashMap::from([
                 ("ssh_url", repo.ssh_url.as_str()),
+                ("clone_url", repo.clone_url.as_str()),
                 ("path", path_str.as_str()),
             ]);
 

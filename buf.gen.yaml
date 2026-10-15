@@ -1,9 +1,11 @@
 version: v2
+clean: true
 managed:
   enabled: true
 plugins:
   # dependencies
-- remote: buf.build/community/neoeinstein-prost
+- remote: buf.build/community/neoeinstein-prost:v0.4.0
+  revision: 1
   out: crates/gitnow/src/gen
   
 inputs:
