@@ -18,7 +18,7 @@ steps:
 
   cache-save:  # ci-cache: managed by kjuulh/woodpecker-forest
     # Saves every wired step's snapshot from the shared workspace (grund-docs design/ci-cache.md).  # ci-cache: managed by kjuulh/woodpecker-forest
-    image: alpine:3.22  # ci-cache: managed by kjuulh/woodpecker-forest
+    image: alpine:3.24  # ci-cache: managed by kjuulh/woodpecker-forest
     depends_on: [test]  # ci-cache: managed by kjuulh/woodpecker-forest
     failure: ignore  # ci-cache: managed by kjuulh/woodpecker-forest
     when:  # ci-cache: managed by kjuulh/woodpecker-forest
