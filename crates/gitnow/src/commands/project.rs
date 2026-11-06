@@ -175,7 +175,9 @@ fn parse_cutoff_date(value: &str) -> Result<chrono::DateTime<Utc>, String> {
 
     chrono::DateTime::parse_from_rfc3339(value)
         .map(|date| date.with_timezone(&Utc))
-        .map_err(|_| format!("invalid date '{value}'; expected YYYY-MM-DD or an RFC 3339 timestamp"))
+        .map_err(|_| {
+            format!("invalid date '{value}'; expected YYYY-MM-DD or an RFC 3339 timestamp")
+        })
 }
 
 /// Resolve a config directory path, expanding `~` to the home directory.
@@ -450,24 +452,16 @@ impl ProjectCommand {
         }
 
         let project = match &self.search {
-            Some(needle) => {
-                let matched = projects
-                    .iter()
-                    .find(|p| p.name.contains(needle.as_str()))
-                    .or_else(|| {
-                        projects.iter().find(|p| {
-                            p.name
-                                .to_lowercase()
-                                .contains(&needle.to_lowercase())
-                        })
-                    })
-                    .ok_or(anyhow::anyhow!(
-                        "no project matching '{}' found",
-                        needle
-                    ))?
-                    .clone();
-                matched
-            }
+            Some(needle) => projects
+                .iter()
+                .find(|p| p.name.contains(needle.as_str()))
+                .or_else(|| {
+                    projects
+                        .iter()
+                        .find(|p| p.name.to_lowercase().contains(&needle.to_lowercase()))
+                })
+                .ok_or(anyhow::anyhow!("no project matching '{}' found", needle))?
+                .clone(),
             None => app
                 .interactive()
                 .interactive_search_items(&projects, "")?
@@ -500,10 +494,7 @@ impl ProjectCreateCommand {
             }
         };
 
-        let dir_name = name
-            .replace(' ', "-")
-            .replace('/', "-")
-            .to_lowercase();
+        let dir_name = name.replace([' ', '/'], "-").to_lowercase();
 
         let projects_dir = get_projects_dir(app);
         let project_path = projects_dir.join(&dir_name);
@@ -527,15 +518,17 @@ impl ProjectCreateCommand {
                     .first()
                     .ok_or_else(|| anyhow::anyhow!("no repository matching '{}' found", needle))?
                     .to_owned();
-                if !matched.iter().any(|r: &crate::git_provider::Repository| r.ssh_url == repo.ssh_url) {
+                if !matched
+                    .iter()
+                    .any(|r: &crate::git_provider::Repository| r.ssh_url == repo.ssh_url)
+                {
                     matched.push(repo);
                 }
             }
             matched
         } else {
             eprintln!("Select repositories (Tab to toggle, Enter to confirm):");
-            app.interactive()
-                .interactive_multi_search(&repositories)?
+            app.interactive().interactive_multi_search(&repositories)?
         };
 
         if selected_repos.is_empty() {
@@ -633,15 +626,17 @@ impl ProjectAddCommand {
                     .first()
                     .ok_or_else(|| anyhow::anyhow!("no repository matching '{}' found", needle))?
                     .to_owned();
-                if !matched.iter().any(|r: &crate::git_provider::Repository| r.ssh_url == repo.ssh_url) {
+                if !matched
+                    .iter()
+                    .any(|r: &crate::git_provider::Repository| r.ssh_url == repo.ssh_url)
+                {
                     matched.push(repo);
                 }
             }
             matched
         } else {
             eprintln!("Select repositories to add (Tab to toggle, Enter to confirm):");
-            app.interactive()
-                .interactive_multi_search(&repositories)?
+            app.interactive().interactive_multi_search(&repositories)?
         };
 
         if selected_repos.is_empty() {
@@ -750,7 +745,10 @@ impl ProjectRemoveCommand {
                 eprintln!("  removed {}", repo.repo_name);
                 removed += 1;
             } else {
-                eprintln!("  {} not found on disk, dropping from manifest", repo.repo_name);
+                eprintln!(
+                    "  {} not found on disk, dropping from manifest",
+                    repo.repo_name
+                );
             }
         }
 
@@ -761,8 +759,7 @@ impl ProjectRemoveCommand {
 
         eprintln!(
             "removed {} repositories from project '{}'",
-            removed,
-            project.name
+            removed, project.name
         );
 
         Ok(())
@@ -835,11 +832,11 @@ impl ProjectListCommand {
                 } else {
                     println!("{}", project.name);
                 }
-                if self.repos {
-                    if let Some(meta) = &project.metadata {
-                        for repo in &meta.repositories {
-                            println!("  {}/{}/{}", repo.provider, repo.owner, repo.repo_name);
-                        }
+                if self.repos
+                    && let Some(meta) = &project.metadata
+                {
+                    for repo in &meta.repositories {
+                        println!("  {}/{}/{}", repo.provider, repo.owner, repo.repo_name);
                     }
                 }
             }

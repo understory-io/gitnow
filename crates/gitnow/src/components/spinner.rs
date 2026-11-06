@@ -5,8 +5,6 @@ use ratatui::{
     widgets::{Block, Paragraph, StatefulWidget, Widget},
 };
 
-use super::{BatchCommand, IntoCommand, Msg};
-
 pub struct Spinner<'a> {
     span: Span<'a>,
     block: Option<Block<'a>>,
@@ -68,16 +66,12 @@ impl Default for SpinnerState {
 const MINIDOT_FRAMES: [&str; 10] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
 impl SpinnerState {
-    pub fn update(&mut self, _msg: &Msg) -> impl IntoCommand {
-        let batch = BatchCommand::default();
-
+    pub fn update(&mut self) {
         let now = Instant::now();
         if now.duration_since(self.last_event) >= self.interval {
             self.last_event = now;
             self.next_state();
         }
-
-        batch
     }
 
     fn next_state(&mut self) {

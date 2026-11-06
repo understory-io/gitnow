@@ -25,7 +25,9 @@ mod interactive;
 mod project_metadata;
 mod projects_list;
 mod shell;
+mod subprocess;
 mod template_command;
+mod terminal;
 mod worktree;
 mod zero_config;
 
@@ -160,11 +162,13 @@ async fn main() -> anyhow::Result<()> {
                 .execute(
                     search.as_deref(),
                     cli.interactive,
-                    !cli.no_cache,
-                    !cli.no_clone,
-                    !no_shell,
-                    cli.force_refresh,
-                    cli.force_cache_update,
+                    commands::root::RootOptions {
+                        cache: !cli.no_cache,
+                        clone: !cli.no_clone,
+                        shell: !no_shell,
+                        force_refresh: cli.force_refresh,
+                        force_cache_update: cli.force_cache_update,
+                    },
                     &chooser,
                 )
                 .await?;

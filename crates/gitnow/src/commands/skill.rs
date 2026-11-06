@@ -291,6 +291,13 @@ post_clone_command = "echo 'cloned!'"
 # Commands to run when opening an already-cloned repository
 post_update_command = "git fetch --prune"
 
+# Optional overrides for mixed Git/jj checkouts (.jj at the root selects jj).
+# Missing override falls back to post_update_command; [] explicitly disables it.
+# post_update_command_by_vcs = { git = ["git fetch origin"], jj = ["jj git fetch"] }
+
+# Hooks are split on spaces, not shell-evaluated. Use a helper executable for
+# compound commands. A failure stops navigation and preserves the checkout.
+
 [settings.cache]
 # Where the cache is stored (default: ~/.cache/gitnow)
 location = "~/.cache/gitnow"

@@ -1,8 +1,8 @@
 [settings]
 # Runs after a project is fetched for the first time, either a single string, or multiple in an array
 post_clone_command = "jj git init --colocate"
-# Runs after a project is jumped to if it already exists.
-post_update_command = ["git pull", "jj git fetch"]
+# Runs after a project is jumped to if it already exists; .jj selects the jj hook.
+post_update_command_by_vcs = { git = ["git fetch origin"], jj = ["jj git fetch"] }
 
 [[providers.github]]
 # Who is the user running the clone command

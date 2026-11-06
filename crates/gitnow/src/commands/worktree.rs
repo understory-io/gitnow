@@ -4,11 +4,11 @@ use crate::{
     app::App,
     cache::load_repositories,
     chooser::Chooser,
-    components::inline_command::InlineCommand,
+    components::progress_command::ProgressCommand,
     fuzzy_matcher::FuzzyMatcherApp,
     interactive::{InteractiveApp, StringItem},
     shell::ShellApp,
-    worktree::{sanitize_branch_name, WorktreeApp},
+    worktree::{WorktreeApp, sanitize_branch_name},
 };
 
 use super::root::RepositoryMatcher;
@@ -62,9 +62,9 @@ impl WorktreeCommand {
 
         // Step 3: Ensure bare clone exists
         if !bare_path.exists() {
-            if std::io::stdout().is_terminal() && !self.no_shell {
+            if std::io::stdin().is_terminal() && std::io::stdout().is_terminal() && !self.no_shell {
                 let mut wrap_cmd =
-                    InlineCommand::new(format!("cloning: {}", repo.to_rel_path().display()));
+                    ProgressCommand::new(format!("cloning: {}", repo.to_rel_path().display()));
                 let wt = app.worktree();
                 let repo_clone = repo.clone();
                 let bare_path_clone = bare_path.clone();
@@ -100,8 +100,7 @@ impl WorktreeCommand {
                 b.clone()
             }
             None => {
-                let items: Vec<StringItem> =
-                    branches.into_iter().map(StringItem).collect();
+                let items: Vec<StringItem> = branches.into_iter().map(StringItem).collect();
 
                 let selected = app
                     .interactive()
@@ -118,22 +117,20 @@ impl WorktreeCommand {
         let worktree_path = project_path.join(&sanitized);
 
         if !worktree_path.exists() {
-            if std::io::stdout().is_terminal() && !self.no_shell {
-                let mut wrap_cmd =
-                    InlineCommand::new(format!("creating worktree: {}", &branch));
+            if std::io::stdin().is_terminal() && std::io::stdout().is_terminal() && !self.no_shell {
+                let mut wrap_cmd = ProgressCommand::new(format!("creating worktree: {}", branch));
                 let wt = app.worktree();
                 let bare_path = bare_path.clone();
                 let worktree_path = worktree_path.clone();
                 let branch = branch.clone();
                 wrap_cmd
                     .execute(move || async move {
-                        wt.add_worktree(&bare_path, &worktree_path, &branch)
-                            .await?;
+                        wt.add_worktree(&bare_path, &worktree_path, &branch).await?;
                         Ok(())
                     })
                     .await?;
             } else {
-                eprintln!("creating worktree for branch '{}'...", &branch);
+                eprintln!("creating worktree for branch '{}'...", branch);
                 app.worktree()
                     .add_worktree(&bare_path, &worktree_path, &branch)
                     .await?;

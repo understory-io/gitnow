@@ -76,11 +76,7 @@ impl GiteaProvider {
         let mut page = 1;
         loop {
             let repos: Vec<GiteaRepo> = self
-                .request(
-                    &format!("{api}/users/{user}/repos"),
-                    access_token,
-                    page,
-                )
+                .request(&format!("{api}/users/{user}/repos"), access_token, page)
                 .await?;
 
             if repos.is_empty() {

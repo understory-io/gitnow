@@ -173,10 +173,7 @@ mod tests {
     fn test_sanitize_branch_name() {
         assert_eq!(sanitize_branch_name("feature/login"), "feature-login");
         assert_eq!(sanitize_branch_name("main"), "main");
-        assert_eq!(
-            sanitize_branch_name("fix/nested/path"),
-            "fix-nested-path"
-        );
+        assert_eq!(sanitize_branch_name("fix/nested/path"), "fix-nested-path");
         assert_eq!(sanitize_branch_name(".hidden"), "_hidden");
     }
 }

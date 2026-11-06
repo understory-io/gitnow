@@ -120,6 +120,31 @@ clone_command = "jj git clone {{ ssh_url }} {{ path }}"
 
 Available template variables: `ssh_url`, `path`.
 
+### Repository hooks
+
+`post_clone_command` runs after a successful new clone; `post_update_command`
+runs when opening an existing checkout. Hook failures stop navigation and keep
+the checkout. Commands are split on spaces, **not interpreted by a shell**;
+use an executable helper for compound commands, not quoted `sh -c`.
+
+For mixed Git and colocated jj checkouts, use repository-aware update hooks:
+
+```toml
+[settings]
+post_clone_command = ["jj git init --colocate"]
+post_update_command_by_vcs = { git = ["git fetch origin"], jj = ["jj git fetch"] }
+```
+
+The `jj` override applies when the checkout root contains `.jj`; otherwise the
+`git` override applies. An absent override falls back to `post_update_command`;
+an explicit empty array disables the hook for that VCS. Existing string/array
+hooks remain valid. No checkout is automatically converted to jj.
+
+Picker and clone progress use a temporary alternate screen without cursor-position
+queries. Interactive displays require terminal stdin and stdout; use a query
+with `--no-shell` for non-interactive navigation. Progress pauses for authentication
+on the controlling terminal; Ctrl-C cancels and Ctrl-Z suspends with terminal state restored.
+
 ### Worktrees
 
 gitnow supports git worktrees (or jj workspaces) via the `worktree` subcommand. This uses bare repositories so each branch gets its own directory as a sibling:

@@ -35,6 +35,8 @@ pub struct Settings {
 
     pub post_clone_command: Option<PostCloneCommand>,
     pub post_update_command: Option<PostUpdateCommand>,
+    #[serde(default)]
+    pub post_update_command_by_vcs: PostUpdateCommandsByVcs,
 
     /// Minijinja template for the clone command.
     /// Default: "git clone {{ ssh_url }} {{ path }}"
@@ -47,6 +49,12 @@ pub struct Settings {
     /// Project scratch-pad configuration.
     #[serde(default)]
     pub project: Option<ProjectSettings>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Clone)]
+pub struct PostUpdateCommandsByVcs {
+    pub git: Option<CommandList>,
+    pub jj: Option<CommandList>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
@@ -396,7 +404,10 @@ mod test {
             "#,
         )?;
 
-        assert_eq!(*config.settings.projects.directory, PathBuf::from("/srv/git"));
+        assert_eq!(
+            *config.settings.projects.directory,
+            PathBuf::from("/srv/git")
+        );
 
         Ok(())
     }
@@ -497,6 +508,7 @@ mod test {
                         directory: PathBuf::from("git").into()
                     },
                     post_update_command: None,
+                    post_update_command_by_vcs: PostUpdateCommandsByVcs::default(),
                     post_clone_command: None,
                     clone_command: None,
                     worktree: None,
@@ -527,6 +539,7 @@ mod test {
                     cache: Cache::default(),
                     projects: Projects::default(),
                     post_update_command: None,
+                    post_update_command_by_vcs: PostUpdateCommandsByVcs::default(),
                     post_clone_command: None,
                     clone_command: None,
                     worktree: None,
@@ -574,15 +587,11 @@ mod test {
         assert_eq!(
             config.settings.worktree,
             Some(WorktreeSettings {
-                clone_command: Some(
-                    "jj git clone {{ ssh_url }} {{ bare_path }}".to_string()
-                ),
+                clone_command: Some("jj git clone {{ ssh_url }} {{ bare_path }}".to_string()),
                 add_command: Some(
                     "jj workspace add --name {{ branch }} {{ worktree_path }}".to_string()
                 ),
-                list_branches_command: Some(
-                    "jj -R {{ bare_path }} branch list".to_string()
-                ),
+                list_branches_command: Some("jj -R {{ bare_path }} branch list".to_string()),
             })
         );
 

@@ -106,13 +106,14 @@ impl Cache {
 }
 
 /// Load repositories using the cache if available, otherwise fetch and update cache.
-pub async fn load_repositories(app: &'static App, use_cache: bool) -> anyhow::Result<Vec<Repository>> {
+pub async fn load_repositories(
+    app: &'static App,
+    use_cache: bool,
+) -> anyhow::Result<Vec<Repository>> {
     use crate::projects_list::ProjectsListApp;
 
-    if use_cache {
-        if let Some(repos) = app.cache().get().await? {
-            return Ok(repos);
-        }
+    if use_cache && let Some(repos) = app.cache().get().await? {
+        return Ok(repos);
     }
 
     tracing::info!("fetching repositories...");

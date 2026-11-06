@@ -1,5 +1,5 @@
+use crate::terminal::TerminalSession;
 use app::App;
-use ratatui::{prelude::*, Terminal};
 
 use crate::git_provider::Repository;
 
@@ -44,20 +44,16 @@ impl Interactive {
         items: &[T],
         initial_query: &str,
     ) -> anyhow::Result<Option<T>> {
-        let backend = TermwizBackend::new().map_err(|e| anyhow::anyhow!(e.to_string()))?;
-        let terminal = Terminal::new(backend)?;
-
-        App::new(self.app, items, initial_query).run(terminal)
+        let mut session = TerminalSession::new()?;
+        App::new(self.app, items, initial_query).run(&mut session.terminal)
     }
 
     pub fn interactive_multi_search<T: Searchable>(
         &mut self,
         items: &[T],
     ) -> anyhow::Result<Vec<T>> {
-        let backend = TermwizBackend::new().map_err(|e| anyhow::anyhow!(e.to_string()))?;
-        let terminal = Terminal::new(backend)?;
-
-        multi_select::MultiSelectApp::new(self.app, items).run(terminal)
+        let mut session = TerminalSession::new()?;
+        multi_select::MultiSelectApp::new(self.app, items).run(&mut session.terminal)
     }
 }
 
@@ -74,13 +70,12 @@ impl InteractiveApp for &'static crate::app::App {
 mod app {
     use crossterm::event::KeyModifiers;
     use ratatui::{
+        DefaultTerminal, Frame,
         crossterm::event::{self, Event, KeyCode},
         layout::{Constraint, Layout},
-        prelude::TermwizBackend,
         style::{Style, Stylize},
         text::{Line, Span},
         widgets::{ListItem, ListState, Paragraph, StatefulWidget},
-        Frame, Terminal,
     };
 
     use crate::fuzzy_matcher::FuzzyMatcherApp;
@@ -125,10 +120,7 @@ mod app {
             }
         }
 
-        pub fn run(
-            mut self,
-            mut terminal: Terminal<TermwizBackend>,
-        ) -> anyhow::Result<Option<T>> {
+        pub fn run(mut self, terminal: &mut DefaultTerminal) -> anyhow::Result<Option<T>> {
             self.update_matched_items();
 
             loop {
@@ -156,10 +148,8 @@ mod app {
                         }
                         KeyCode::Enter => {
                             if let Some(selected) = self.list.selected()
-                                && let Some(item) =
-                                    self.matched_items.get(selected).cloned()
+                                && let Some(item) = self.matched_items.get(selected).cloned()
                             {
-                                terminal.resize(ratatui::layout::Rect::ZERO)?;
                                 return Ok(Some(item));
                             }
 
@@ -177,11 +167,13 @@ mod app {
             let vertical = Layout::vertical([Constraint::Percentage(100), Constraint::Min(1)]);
             let [list_area, input_area] = vertical.areas(frame.area());
 
-            let display_items: Vec<String> =
-                self.matched_items.iter().map(|i| i.display_label()).collect();
+            let display_items: Vec<String> = self
+                .matched_items
+                .iter()
+                .map(|i| i.display_label())
+                .collect();
 
-            let list_items: Vec<ListItem> =
-                display_items.into_iter().map(ListItem::from).collect();
+            let list_items: Vec<ListItem> = display_items.into_iter().map(ListItem::from).collect();
 
             let list = ratatui::widgets::List::new(list_items)
                 .direction(ratatui::widgets::ListDirection::BottomToTop)
@@ -208,13 +200,12 @@ pub mod multi_select {
 
     use crossterm::event::KeyModifiers;
     use ratatui::{
+        DefaultTerminal, Frame,
         crossterm::event::{self, Event, KeyCode},
         layout::{Constraint, Layout},
-        prelude::TermwizBackend,
         style::{Style, Stylize},
         text::{Line, Span},
         widgets::{ListItem, ListState, Paragraph, StatefulWidget},
-        Frame, Terminal,
     };
 
     use crate::fuzzy_matcher::FuzzyMatcherApp;
@@ -262,20 +253,17 @@ pub mod multi_select {
         }
 
         fn toggle_current(&mut self) {
-            if let Some(selected) = self.list.selected() {
-                if let Some(item) = self.matched_items.get(selected) {
-                    let label = item.display_label();
-                    if !self.selected_labels.remove(&label) {
-                        self.selected_labels.insert(label);
-                    }
+            if let Some(selected) = self.list.selected()
+                && let Some(item) = self.matched_items.get(selected)
+            {
+                let label = item.display_label();
+                if !self.selected_labels.remove(&label) {
+                    self.selected_labels.insert(label);
                 }
             }
         }
 
-        pub fn run(
-            mut self,
-            mut terminal: Terminal<TermwizBackend>,
-        ) -> anyhow::Result<Vec<T>> {
+        pub fn run(mut self, terminal: &mut DefaultTerminal) -> anyhow::Result<Vec<T>> {
             self.update_matched_items();
 
             loop {
@@ -309,7 +297,6 @@ pub mod multi_select {
                                 // Don't allow confirming with no selections
                                 continue;
                             }
-                            terminal.resize(ratatui::layout::Rect::ZERO)?;
                             let selected: Vec<T> = self
                                 .items
                                 .iter()

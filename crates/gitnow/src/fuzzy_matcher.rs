@@ -1,4 +1,4 @@
-use nucleo_matcher::{pattern::Pattern, Matcher};
+use nucleo_matcher::{Matcher, pattern::Pattern};
 
 use crate::app::App;
 

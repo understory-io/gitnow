@@ -20,7 +20,7 @@ mod implementation {
     use crate::{
         app::App,
         git_provider::{
-            gitea::GiteaProviderApp, github::GitHubProviderApp, Repository, VecRepositoryExt,
+            Repository, VecRepositoryExt, gitea::GiteaProviderApp, github::GitHubProviderApp,
         },
     };
 

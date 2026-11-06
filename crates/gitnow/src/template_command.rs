@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use anyhow::Context;
 
 pub const DEFAULT_CLONE_COMMAND: &str = "git clone {{ ssh_url }} {{ path }}";
-pub const DEFAULT_WORKTREE_CLONE_COMMAND: &str =
-    "git clone --bare {{ ssh_url }} {{ bare_path }}";
+pub const DEFAULT_WORKTREE_CLONE_COMMAND: &str = "git clone --bare {{ ssh_url }} {{ bare_path }}";
 pub const DEFAULT_WORKTREE_ADD_COMMAND: &str =
     "git -C {{ bare_path }} worktree add {{ worktree_path }} {{ branch }}";
 pub const DEFAULT_LIST_BRANCHES_COMMAND: &str =
@@ -18,9 +17,9 @@ pub async fn render_and_execute(
 
     tracing::debug!("executing: {} {}", program, args.join(" "));
 
-    let output = tokio::process::Command::new(&program)
-        .args(&args)
-        .output()
+    let mut command = tokio::process::Command::new(&program);
+    command.args(&args);
+    let output = crate::subprocess::output(&mut command)
         .await
         .with_context(|| format!("failed to execute: {} {}", program, args.join(" ")))?;
 
@@ -94,10 +93,7 @@ mod tests {
     fn test_render_worktree_clone_command() {
         let context = HashMap::from([
             ("ssh_url", "ssh://git@github.com/owner/repo.git"),
-            (
-                "bare_path",
-                "/home/user/git/github.com/owner/repo/.bare",
-            ),
+            ("bare_path", "/home/user/git/github.com/owner/repo/.bare"),
         ]);
 
         let (program, args) =
@@ -117,10 +113,7 @@ mod tests {
     #[test]
     fn test_render_worktree_add_command() {
         let context = HashMap::from([
-            (
-                "bare_path",
-                "/home/user/git/github.com/owner/repo/.bare",
-            ),
+            ("bare_path", "/home/user/git/github.com/owner/repo/.bare"),
             (
                 "worktree_path",
                 "/home/user/git/github.com/owner/repo/feature-x",
@@ -128,8 +121,7 @@ mod tests {
             ("branch", "feature/x"),
         ]);
 
-        let (program, args) =
-            render_command_parts(DEFAULT_WORKTREE_ADD_COMMAND, &context).unwrap();
+        let (program, args) = render_command_parts(DEFAULT_WORKTREE_ADD_COMMAND, &context).unwrap();
         assert_eq!(program, "git");
         assert_eq!(
             args,
