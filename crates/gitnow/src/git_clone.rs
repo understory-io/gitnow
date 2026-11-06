@@ -64,17 +64,13 @@ impl GitClone {
                 repository.ssh_url.as_str(),
                 &project_path.display().to_string(),
             ),
-            false => {
-                let stdout = std::str::from_utf8(&output.stdout).unwrap_or_default();
-                let stderr = std::str::from_utf8(&output.stderr).unwrap_or_default();
-                tracing::error!(
-                    "failed to clone {} into {}, with output: {}, err: {}",
-                    repository.ssh_url.as_str(),
-                    &project_path.display().to_string(),
-                    stdout,
-                    stderr
-                )
-            }
+            false => anyhow::bail!(
+                "clone failed for {} into {} ({}): {}",
+                repository.ssh_url,
+                project_path.display(),
+                output.status,
+                String::from_utf8_lossy(&output.stderr).trim()
+            ),
         }
 
         Ok(())

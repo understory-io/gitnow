@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-06
+
+### Added
+- Optional `settings.post_update_command_by_vcs` Git/jj overrides, selected by checkout-local `.jj`; existing update hooks remain the fallback.
+
+### Fixed
+- Picker and clone progress share guarded crossterm ownership and use temporary fullscreen displays without cursor-position queries or DSR timeouts.
+- Restore raw mode, cursor visibility and alternate screen on success, cancellation, error and panic.
+- Propagate hook and clone failures without deleting checkouts; run post-clone hooks with and without interactive progress.
+- Cancel owned clone work and its process group rather than detaching it when progress is dismissed; preserve terminal authentication and job-control handoff.
+
 ## [0.7.0] - 2026-09-10
 
 ### Added

@@ -31,18 +31,21 @@ prost = "0.13.2"
 prost-types = "0.13.2"
 bytes = "1.7.1"
 nucleo-matcher = "0.3.1"
-ratatui = { version = "0.29.0", features = ["termwiz"] }
-crossterm = { version = "0.28.0", features = ["event-stream"] }
+ratatui = { version = "0.29.0" }
+crossterm = { version = "0.28.0" }
 futures = "0.3.30"
-termwiz = "0.23.0"
 regex = "1.11.1"
 minijinja = "2"
 shell-words = "1"
 chrono = { version = "0.4", default-features = false, features = ["std", "now", "serde"] }
 serde_json = "1"
 
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.29", features = ["signal", "process", "term"] }
+
 [dev-dependencies]
 pretty_assertions = "1.4.0"
+tempfile = "3"
 
 [features]
 example = []

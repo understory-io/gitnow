@@ -99,11 +99,7 @@ impl GitHubProvider {
         let mut url = Some(initial_url.to_string());
 
         while let Some(current_url) = url {
-            let resp = client
-                .get(&current_url)
-                .send()
-                .await?
-                .error_for_status()?;
+            let resp = client.get(&current_url).send().await?.error_for_status()?;
 
             url = parse_next_link(resp.headers());
 

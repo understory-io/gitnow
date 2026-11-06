@@ -2,9 +2,9 @@ use std::io::IsTerminal;
 
 use crate::{
     app::App,
-    cache::{load_repositories, CacheApp},
+    cache::{CacheApp, load_repositories},
     chooser::Chooser,
-    components::inline_command::InlineCommand,
+    components::progress_command::ProgressCommand,
     custom_command::CustomCommandApp,
     fuzzy_matcher::{FuzzyMatcher, FuzzyMatcherApp},
     git_clone::GitCloneApp,
@@ -19,6 +19,14 @@ pub struct RootCommand {
     app: &'static App,
 }
 
+pub struct RootOptions {
+    pub cache: bool,
+    pub clone: bool,
+    pub shell: bool,
+    pub force_refresh: bool,
+    pub force_cache_update: bool,
+}
+
 impl RootCommand {
     pub fn new(app: &'static App) -> Self {
         Self { app }
@@ -28,13 +36,16 @@ impl RootCommand {
         &mut self,
         search: Option<&str>,
         interactive: bool,
-        cache: bool,
-        clone: bool,
-        shell: bool,
-        force_refresh: bool,
-        force_cache_update: bool,
+        options: RootOptions,
         chooser: &Chooser,
     ) -> anyhow::Result<()> {
+        let RootOptions {
+            cache,
+            clone,
+            shell,
+            force_refresh,
+            force_cache_update,
+        } = options;
         tracing::debug!("executing");
 
         let repositories = if force_cache_update {
@@ -85,9 +96,9 @@ impl RootCommand {
             if clone {
                 let git_clone = self.app.git_clone();
 
-                if std::io::stdout().is_terminal() && shell {
+                if std::io::stdin().is_terminal() && std::io::stdout().is_terminal() && shell {
                     let mut wrap_cmd =
-                        InlineCommand::new(format!("cloning: {}", repo.to_rel_path().display()));
+                        ProgressCommand::new(format!("cloning: {}", repo.to_rel_path().display()));
                     let repo = repo.clone();
                     wrap_cmd
                         .execute(move || async move {
@@ -99,12 +110,12 @@ impl RootCommand {
                 } else {
                     eprintln!("cloning repository...");
                     git_clone.clone_repo(&repo, force_refresh).await?;
-
-                    self.app
-                        .custom_command()
-                        .execute_post_clone_command(&project_path)
-                        .await?;
                 }
+
+                self.app
+                    .custom_command()
+                    .execute_post_clone_command(&project_path)
+                    .await?;
             } else {
                 tracing::info!("skipping clone for repo: {}", &repo.to_rel_path().display());
             }
@@ -121,7 +132,15 @@ impl RootCommand {
             self.app.shell().spawn_shell(&repo).await?;
         } else {
             tracing::info!("skipping shell for repo: {}", &repo.to_rel_path().display());
-            chooser.set(&self.app.config.settings.projects.directory.join(repo.to_rel_path()))?;
+            chooser.set(
+                &self
+                    .app
+                    .config
+                    .settings
+                    .projects
+                    .directory
+                    .join(repo.to_rel_path()),
+            )?;
         }
 
         Ok(())

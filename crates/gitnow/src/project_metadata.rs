@@ -37,11 +37,7 @@ impl From<&Repository> for RepoEntry {
 }
 
 impl ProjectMetadata {
-    pub fn new(
-        name: String,
-        template: Option<String>,
-        repositories: Vec<RepoEntry>,
-    ) -> Self {
+    pub fn new(name: String, template: Option<String>, repositories: Vec<RepoEntry>) -> Self {
         Self {
             version: 1,
             name,
